@@ -1,0 +1,35 @@
+services:
+  concordium-verifier:
+    image: concordium/credential-verification-service:0.1.0
+    platform: linux/amd64
+    container_name: concordium-verifier
+    restart: unless-stopped
+    expose:
+      - "8000"
+      - "8001"
+    environment:
+      CREDENTIAL_VERIFICATION_SERVICE_NODE_GRPC_ENDPOINT: "${CONCORDIUM_NODE_GRPC:-https://grpc.testnet.concordium.com:20000}"
+      CREDENTIAL_VERIFICATION_SERVICE_API_ADDRESS: "0.0.0.0:8000"
+      CREDENTIAL_VERIFICATION_SERVICE_MONITORING_ADDRESS: "0.0.0.0:8001"
+      CREDENTIAL_VERIFICATION_SERVICE_LOG_LEVEL: "${LOG_LEVEL:-info}"
+      CREDENTIAL_VERIFICATION_SERVICE_ACCOUNT: "/keys/verifier_account.export"
+    volumes:
+      - ./keys/private.export:/keys/verifier_account.export:ro
+
+  api:
+    build: .
+    container_name: web3-id-verify-api
+    restart: unless-stopped
+    depends_on:
+      - concordium-verifier
+    ports:
+      - "${PORT:-8084}:8084"
+    environment:
+      PORT: 8084
+      NODE_ENV: production
+      CORS_ORIGINS: "${CORS_ORIGINS:-*}"
+      VERIFIER_SERVICE_URL: "http://concordium-verifier:8000"
+      CONCORDIUM_NETWORK: "${CONCORDIUM_NETWORK:-testnet}"
+      DEFAULT_CONTEXT_STRING: "${DEFAULT_CONTEXT_STRING:-Age and country verification for site access}"
+      DEFAULT_RESOURCE_ID: "${DEFAULT_RESOURCE_ID:-/}"
+      VERIFICATION_SESSION_TTL: "${VERIFICATION_SESSION_TTL:-300}"

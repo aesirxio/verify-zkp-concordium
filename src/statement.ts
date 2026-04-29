@@ -10,9 +10,11 @@ export interface StatementParams {
 interface AttributeInRangeStatement {
   type: 'AttributeInRange';
   attributeTag: 'dob';
-  lower?: string;
-  upper?: string;
+  lower: string;
+  upper: string;
 }
+
+const DOB_FLOOR = '19000101';
 
 interface AttributeInSetStatement {
   type: 'AttributeInSet' | 'AttributeNotInSet';
@@ -62,19 +64,19 @@ export const buildStatements = (params: StatementParams): Statement[] => {
     const upperObj = new Date(today);
     upperObj.setFullYear(upperObj.getFullYear() - minimumAge);
 
-    const statement: AttributeInRangeStatement = {
-      type: 'AttributeInRange',
-      attributeTag: 'dob',
-      upper: formatDate(upperObj),
-    };
-
+    let lower = DOB_FLOOR;
     if (maximumAge > 0) {
       const lowerObj = new Date(today);
       lowerObj.setFullYear(lowerObj.getFullYear() - maximumAge);
-      statement.lower = formatDate(lowerObj);
+      lower = formatDate(lowerObj);
     }
 
-    statements.push(statement);
+    statements.push({
+      type: 'AttributeInRange',
+      attributeTag: 'dob',
+      lower,
+      upper: formatDate(upperObj),
+    });
   }
 
   if (statements.length === 0) {

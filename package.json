@@ -1,7 +1,7 @@
 {
   "name": "web3-id-verify",
-  "version": "0.1.0",
-  "description": "AesirX Web3 ID verification backend (Concordium Verify & Access)",
+  "version": "0.2.0",
+  "description": "AesirX Web3 ID verification backend (Concordium Verify & Access + AesirX Proof Service)",
   "license": "GPL-3.0-only",
   "private": true,
   "type": "module",
@@ -10,11 +10,15 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "seed:credential": "tsx src/scripts/seed-credential.ts"
   },
   "dependencies": {
+    "@concordium/web-sdk": "^12.0.2",
+    "cbor": "^9.0.2",
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

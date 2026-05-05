@@ -1,14 +1,4 @@
 services:
-  redis:
-    image: redis:7-alpine
-    container_name: web3-id-verify-redis
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis-data:/data
-    expose:
-      - "6379"
-
   concordium-verifier:
     image: concordium/credential-verification-service:0.1.0
     platform: linux/amd64
@@ -32,9 +22,11 @@ services:
     restart: unless-stopped
     depends_on:
       - concordium-verifier
-      - redis
     ports:
       - "${PORT:-8084}:8084"
+    networks:
+      - default
+      - aesirx-scanner
     environment:
       PORT: 8084
       NODE_ENV: production
@@ -44,8 +36,10 @@ services:
       DEFAULT_CONTEXT_STRING: "${DEFAULT_CONTEXT_STRING:-Age and country verification for site access}"
       DEFAULT_RESOURCE_ID: "${DEFAULT_RESOURCE_ID:-/}"
       VERIFICATION_SESSION_TTL: "${VERIFICATION_SESSION_TTL:-300}"
-      # AesirX Proof Service
-      REDIS_URL: "${REDIS_URL:-redis://redis:6379}"
+      # AesirX Proof Service — Redis is the existing aesirx_redis on the
+      # aesirx-scanner network. Set REDIS_PASSWORD in this project's .env to
+      # match the password aesirx_redis was started with.
+      REDIS_URL: "${REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379}"
       REDIS_KEY_PREFIX: "${REDIS_KEY_PREFIX:-aps}"
       CONCORDIUM_NODE_HOST: "${CONCORDIUM_NODE_HOST:-grpc.testnet.concordium.com}"
       CONCORDIUM_NODE_PORT: "${CONCORDIUM_NODE_PORT:-20000}"
@@ -58,5 +52,6 @@ services:
       BATCH_WINDOW_SEC: "${BATCH_WINDOW_SEC:-300}"
       MAX_LEAVES_PER_BATCH: "${MAX_LEAVES_PER_BATCH:-1024}"
 
-volumes:
-  redis-data:
+networks:
+  aesirx-scanner:
+    external: true

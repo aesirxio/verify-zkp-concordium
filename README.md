@@ -118,14 +118,14 @@ Front it with Caddy/Nginx for TLS termination → `:8084`.
 The proof service has no public registration endpoint — credentials are written directly to Redis:
 
 ```bash
-docker compose exec api node dist/scripts/seed-credential.js --org web3id-prod
+docker compose exec api node dist/scripts/seed-credential.js --org AesirX.io
 ```
 
 Output (paste into the calling service's env, e.g. `web3-id-backend/api/.env`):
 
 ```
-AESIRX_PROOF_ORG_ID=web3id-prod
-AESIRX_PROOF_CREDENTIAL_ID=cred_web3id-prod_1730xxxxxx
+AESIRX_PROOF_ORG_ID=AesirX.io
+AESIRX_PROOF_CREDENTIAL_ID=cred_AesirX.io_1730xxxxxx
 AESIRX_PROOF_SECRET=<64-hex>
 ```
 

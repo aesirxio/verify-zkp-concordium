@@ -108,3 +108,10 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
 ];
 
 export const DEFAULT_UNIT_PRICE_USD = 0.015;
+
+// When false, tenants cannot self-redeem credit packages via
+// POST /v1/usage/orgs/:orgId/credit-packages — credits must be granted
+// by an operator running src/scripts/grant-credits.ts. Default false
+// so a fresh install is locked down until billing is wired up.
+export const ALLOW_SELF_REDEEM =
+  (process.env.ALLOW_SELF_REDEEM || 'false').toLowerCase() === 'true';

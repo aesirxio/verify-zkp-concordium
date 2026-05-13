@@ -1,6 +1,6 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 
-import { CREDIT_PACKAGES } from '../config.js';
+import { ALLOW_SELF_REDEEM, CREDIT_PACKAGES } from '../config.js';
 import { requireHmac } from '../middleware/auth.js';
 import { idempotent } from '../middleware/idempotency.js';
 import { apiError } from '../middleware/errors.js';
@@ -59,6 +59,14 @@ router.post(
   idempotent,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!ALLOW_SELF_REDEEM) {
+        throw apiError(403, {
+          code: 'self_redeem_disabled',
+          message:
+            'credit packages must be granted by an operator (see scripts/grant-credits)',
+          retryable: false,
+        });
+      }
       const ctx = req.aps!;
       if (req.params.orgId !== ctx.orgId) {
         throw apiError(403, {

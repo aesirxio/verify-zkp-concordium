@@ -131,7 +131,31 @@ AESIRX_PROOF_SECRET=<64-hex>
 
 Flags: `--cred <id>` (pin a stable ID), `--rotate` (overwrite an existing secret), `--secret <hex>` (supply your own).
 
-### 4. Backups
+### 4. Grant credit packages (demo / pre-billing)
+
+Until Stripe is wired up, `POST /v1/usage/orgs/:orgId/credit-packages` is locked
+down by default (`ALLOW_SELF_REDEEM=false`). Tenants cannot self-redeem — an
+operator runs a CLI inside the container:
+
+```bash
+# Grant 100k units (growth pack) to an org
+docker compose exec api node dist/scripts/grant-credits.js \
+  --org AesirX.io --package growth --note "Demo grant 2026-05-11"
+
+# Clawback the same package if needed
+docker compose exec api node dist/scripts/revoke-credits.js \
+  --org AesirX.io --package growth --note "Demo wrap-up"
+```
+
+Packages: `starter` (10k units), `growth` (100k units), `enterprise` (1M units).
+The grant inserts a `package_history` row stamped `manual:<grant_id>` so the
+audit trail shows it was operator-driven, not paid. Revoke rows are stamped
+`revoke:<revoke_id>` with `priceUsd: 0` and negative `units` for clarity.
+
+To switch to self-redeem once billing is live, set `ALLOW_SELF_REDEEM=true` in
+the API container env.
+
+### 5. Backups
 
 Back up the `redis-data` volume — it holds credentials, batch state, idempotency cache, proof receipts, and usage. Losing it doesn't lose on-chain transactions, but it loses the mapping from event payloads to those transactions.
 
